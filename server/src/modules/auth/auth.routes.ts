@@ -1,15 +1,10 @@
 import { Router } from "express";
 import { protect } from "../../middlewares/auth.middleware";
-import { AuthRequest } from "./auth.types";
+import { getMe, syncUser } from "./auth.controller";
 
 const router = Router();
 
-// Endpoint to check auth status and return user profile
-router.get("/me", protect, (req: AuthRequest, res) => {
-  res.status(200).json({
-    status: "success",
-    data: { user: req.user },
-  });
-});
+router.get("/me", protect, getMe);
+router.post("/sync", protect, syncUser);
 
 export default router;

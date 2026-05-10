@@ -1,22 +1,18 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import "dotenv/config";
+import app from "./app";
+import connectDB from "./config/db";
 
-dotenv.config();
+const PORT = Number(process.env.PORT) || 5000;
 
-const app = express();
+const startServer = async () => {
+  await connectDB();
 
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (_req, res) => {
-  res.json({
-    message: "Finance Tracker API Running",
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
-});
+};
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+startServer().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
 });
