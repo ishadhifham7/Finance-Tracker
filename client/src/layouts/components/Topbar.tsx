@@ -17,9 +17,9 @@ export default function Topbar() {
         </button>
         <button className="icon-button" aria-label="Profile">
           {currentUser?.photoURL ? (
-            <img 
-              src={currentUser.photoURL} 
-              alt="Profile" 
+            <img
+              src={currentUser.photoURL}
+              alt="Profile"
               style={{ width: 24, height: 24, borderRadius: "50%" }}
             />
           ) : (

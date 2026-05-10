@@ -1,4 +1,12 @@
-import { TrendingUp, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownLeft, MoreHorizontal } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Percent,
+  ArrowUpRight,
+  ArrowDownLeft,
+  MoreHorizontal,
+} from "lucide-react";
 
 const statCards = [
   {
@@ -64,8 +72,14 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="bento-stat-value">{card.value}</div>
-              <div className={`bento-stat-change ${card.positive ? "positive" : "negative"}`}>
-                {card.positive ? <ArrowUpRight size={14} /> : <ArrowDownLeft size={14} />}
+              <div
+                className={`bento-stat-change ${card.positive ? "positive" : "negative"}`}
+              >
+                {card.positive ? (
+                  <ArrowUpRight size={14} />
+                ) : (
+                  <ArrowDownLeft size={14} />
+                )}
                 {card.change} this month
               </div>
             </div>
@@ -75,14 +89,19 @@ export default function Dashboard() {
         <div className="bento-card bento-chart">
           <div className="bento-card-header">
             <span className="bento-card-title">Spending Overview</span>
-            <button className="bento-more-btn"><MoreHorizontal size={16} /></button>
+            <button className="bento-more-btn">
+              <MoreHorizontal size={16} />
+            </button>
           </div>
           <div className="bento-chart-area">
             <div className="bento-chart-bars">
               {chartMonths.map((month) => (
                 <div key={month} className="bento-chart-bar-col">
                   <div className="bento-chart-bar-track">
-                    <div className="bento-chart-bar-fill" style={{ height: "0%" }} />
+                    <div
+                      className="bento-chart-bar-fill"
+                      style={{ height: "0%" }}
+                    />
                   </div>
                   <span className="bento-chart-label">{month}</span>
                 </div>
@@ -100,16 +119,20 @@ export default function Dashboard() {
           <div className="bento-transaction-list">
             {recentTransactions.map((tx, i) =>
               tx.type === "empty" ? (
-                <div key={i} className="bento-tx-empty">No transactions yet</div>
+                <div key={i} className="bento-tx-empty">
+                  No transactions yet
+                </div>
               ) : (
                 <div key={i} className="bento-tx-row">
                   <div className="bento-tx-info">
                     <span className="bento-tx-name">{tx.name}</span>
                     <span className="bento-tx-cat">{tx.category}</span>
                   </div>
-                  <span className={`bento-tx-amount ${tx.type}`}>{tx.amount}</span>
+                  <span className={`bento-tx-amount ${tx.type}`}>
+                    {tx.amount}
+                  </span>
                 </div>
-              )
+              ),
             )}
           </div>
         </div>
@@ -121,13 +144,15 @@ export default function Dashboard() {
           </div>
           <div className="bento-budget-list">
             {budgetItems.map((b) => {
-              const pct = b.limit > 0 ? Math.min((b.spent / b.limit) * 100, 100) : 0;
+              const pct =
+                b.limit > 0 ? Math.min((b.spent / b.limit) * 100, 100) : 0;
               return (
                 <div key={b.label} className="bento-budget-item">
                   <div className="bento-budget-row">
                     <span className="bento-budget-label">{b.label}</span>
                     <span className="bento-budget-amount">
-                      ${b.spent} <span className="bento-budget-limit">/ ${b.limit}</span>
+                      ${b.spent}{" "}
+                      <span className="bento-budget-limit">/ ${b.limit}</span>
                     </span>
                   </div>
                   <div className="bento-budget-track">

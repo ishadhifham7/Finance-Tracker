@@ -7,13 +7,15 @@ interface SidebarItemProps {
   to: string;
 }
 
-export default function SidebarItem({ icon: Icon, label, to }: SidebarItemProps) {
+export default function SidebarItem({
+  icon: Icon,
+  label,
+  to,
+}: SidebarItemProps) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        `sidebar-item ${isActive ? "active" : ""}`
-      }
+      className={({ isActive }) => `sidebar-item ${isActive ? "active" : ""}`}
     >
       <div className="active-indicator" />
       <Icon className="icon" size={20} strokeWidth={2} />
