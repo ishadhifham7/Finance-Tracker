@@ -1,16 +1,16 @@
 export default function Transactions() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        background: "#0b0d10",
-        color: "#eef1f6",
-        fontFamily: "Space Grotesk, sans-serif",
-      }}
-    >
-      Transactions
+    <div>
+      <header className="page-header">
+        <h1>Transactions</h1>
+        <p>Track and manage your recent activity.</p>
+      </header>
+
+      <div className="glass-panel">
+        <p style={{ color: "var(--text-muted)", margin: 0 }}>
+          Transactions table goes here.
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,13 +1,6 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import ProtectedRoute from "./components/shared/ProtectedRoute";
-import PublicRoute from "./components/shared/PublicRoute";
-import Login from "./pages/Auth/Login";
-import Signup from "./pages/Auth/Signup";
-import Budgets from "./pages/Budgets";
-import Dashboard from "./pages/Dashboard";
-import Transactions from "./pages/Transactions";
-import NotFound from "./pages/NotFound";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
@@ -22,18 +15,7 @@ function App() {
           },
         }}
       />
-      <Routes>
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Route>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/budgets" element={<Budgets />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <AppRoutes />
     </BrowserRouter>
   );
 }
