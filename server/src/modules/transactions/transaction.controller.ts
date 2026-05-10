@@ -7,7 +7,6 @@ import * as txService from "./transaction.service";
 import {
   createTransactionSchema,
   listTransactionsQuerySchema,
-  summaryQuerySchema,
   transactionIdParamsSchema,
   updateTransactionSchema,
 } from "./transaction.validation";
@@ -46,12 +45,11 @@ export const listTransactions = asyncHandler(
 export const getFinancialSummary = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const userId = requireUserId(req);
-    const query = summaryQuerySchema.parse(req.query);
-    const summary = await txService.getFinancialSummary(userId, query);
+    const summary = await txService.getFinancialSummary(userId);
 
     res.status(200).json({
       status: "success",
-      data: { summary },
+      data: summary,
     });
   },
 );

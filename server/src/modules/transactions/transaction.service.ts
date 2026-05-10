@@ -4,7 +4,6 @@ import { ApiError } from "../../utils/apiError";
 import {
   CreateTransactionInput,
   ListTransactionsQuery,
-  SummaryQuery,
   UpdateTransactionInput,
 } from "./transaction.validation";
 
@@ -68,7 +67,6 @@ export const listTransactions = async (
       .sort(sort)
       .skip(skip)
       .limit(query.limit)
-      .lean<ITransaction[]>()
       .exec(),
     Transaction.countDocuments(filter).exec(),
   ]);
@@ -138,64 +136,76 @@ export const deleteTransaction = async (
 };
 
 export interface FinancialSummary {
-  totalIncome: number;
-  totalExpenses: number;
-  balance: number;
-  transactionCount: number;
-  incomeCount: number;
-  expenseCount: number;
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  totalBalance: number;
+  savingRate: number;
 }
 
-interface SummaryGroup {
+interface TypeTotal {
   _id: "income" | "expense";
   total: number;
-  count: number;
 }
+
+interface FacetResult {
+  lifetime: TypeTotal[];
+  monthly: TypeTotal[];
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+const extractTotals = (
+  groups: TypeTotal[],
+): { income: number; expenses: number } => {
+  let income = 0;
+  let expenses = 0;
+  for (const g of groups) {
+    if (g._id === "income") income = round2(g.total);
+    else if (g._id === "expense") expenses = round2(g.total);
+  }
+  return { income, expenses };
+};
 
 export const getFinancialSummary = async (
   userId: Types.ObjectId,
-  query: SummaryQuery,
 ): Promise<FinancialSummary> => {
-  const match: QueryFilter<ITransaction> = { userId };
-  if (query.startDate || query.endDate) {
-    match.date = {};
-    if (query.startDate) match.date.$gte = query.startDate;
-    if (query.endDate) match.date.$lte = query.endDate;
-  }
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  const groups = await Transaction.aggregate<SummaryGroup>([
-    { $match: match },
+  const [result] = await Transaction.aggregate<FacetResult>([
+    { $match: { userId } },
     {
-      $group: {
-        _id: "$transactionType",
-        total: { $sum: "$amount" },
-        count: { $sum: 1 },
+      $facet: {
+        lifetime: [
+          { $group: { _id: "$transactionType", total: { $sum: "$amount" } } },
+        ],
+        monthly: [
+          {
+            $match: {
+              date: { $gte: startOfMonth, $lt: startOfNextMonth },
+            },
+          },
+          { $group: { _id: "$transactionType", total: { $sum: "$amount" } } },
+        ],
       },
     },
   ]).exec();
 
-  const summary: FinancialSummary = {
-    totalIncome: 0,
-    totalExpenses: 0,
-    balance: 0,
-    transactionCount: 0,
-    incomeCount: 0,
-    expenseCount: 0,
+  const lifetime = extractTotals(result?.lifetime ?? []);
+  const monthly = extractTotals(result?.monthly ?? []);
+
+  const totalBalance = round2(lifetime.income - lifetime.expenses);
+
+  const savingRate =
+    monthly.income > 0
+      ? round2(((monthly.income - monthly.expenses) / monthly.income) * 100)
+      : 0;
+
+  return {
+    monthlyIncome: monthly.income,
+    monthlyExpenses: monthly.expenses,
+    totalBalance,
+    savingRate,
   };
-
-  for (const g of groups) {
-    if (g._id === "income") {
-      summary.totalIncome = Math.round(g.total * 100) / 100;
-      summary.incomeCount = g.count;
-    } else if (g._id === "expense") {
-      summary.totalExpenses = Math.round(g.total * 100) / 100;
-      summary.expenseCount = g.count;
-    }
-  }
-
-  summary.balance =
-    Math.round((summary.totalIncome - summary.totalExpenses) * 100) / 100;
-  summary.transactionCount = summary.incomeCount + summary.expenseCount;
-
-  return summary;
 };

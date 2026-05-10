@@ -81,18 +81,6 @@ export const listTransactionsQuerySchema = z
     { message: "startDate must be before endDate", path: ["startDate"] },
   );
 
-export const summaryQuerySchema = z
-  .object({
-    startDate: z.coerce.date().optional(),
-    endDate: z.coerce.date().optional(),
-  })
-  .refine(
-    (data) =>
-      !data.startDate || !data.endDate || data.startDate <= data.endDate,
-    { message: "startDate must be before endDate", path: ["startDate"] },
-  );
-
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
-export type SummaryQuery = z.infer<typeof summaryQuerySchema>;
