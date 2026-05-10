@@ -1,6 +1,15 @@
 import { Link } from "react-router-dom";
+import { firebaseAuth } from "../services/firebase";
 
 export default function NotFound() {
+  const getToken = async () => {
+    const user = firebaseAuth.currentUser;
+
+    const token = await user?.getIdToken();
+
+    console.log(token);
+  };
+
   return (
     <div
       style={{
@@ -29,6 +38,7 @@ export default function NotFound() {
         >
           Back to dashboard
         </Link>
+        <button onClick={getToken}>Get Token</button>
       </div>
     </div>
   );
