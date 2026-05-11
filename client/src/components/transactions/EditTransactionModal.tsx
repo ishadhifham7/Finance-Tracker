@@ -3,6 +3,7 @@ import { useState } from "react";
 import { X, Save } from "lucide-react";
 import type { Transaction } from "./types";
 import type { UpdateTransactionPayload } from "../../services/transactionService";
+import CategorySelect from "./CategorySelect";
 
 interface Props {
   transaction: Transaction;
@@ -26,37 +27,47 @@ export default function EditTransactionModal({
   const [form, setForm] = useState({
     title: transaction.title,
     amount: String(transaction.amount),
-    category: transaction.category,
+    categoryId:
+      transaction.categoryId?.id ?? (null as string | null),
     transactionType: transaction.transactionType,
     date: toInputDate(transaction.date),
     note: transaction.note ?? "",
   });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
+  const [errors, setErrors] = useState<{
+    title?: string;
+    amount?: string;
+    date?: string;
+  }>({});
 
-  const set = (field: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+  const set =
+    (field: "title" | "amount" | "transactionType" | "date" | "note") =>
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >,
+    ) =>
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const validate = (): boolean => {
     const next: typeof errors = {};
     if (!form.title.trim()) next.title = "Title is required";
     const amt = Number(form.amount);
-    if (!form.amount || isNaN(amt) || amt <= 0) next.amount = "Enter a valid amount";
-    if (!form.category.trim()) next.category = "Category is required";
+    if (!form.amount || isNaN(amt) || amt <= 0)
+      next.amount = "Enter a valid amount";
     if (!form.date) next.date = "Date is required";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     if (!validate()) return;
 
     const payload: UpdateTransactionPayload = {
       title: form.title.trim(),
       amount: Number(form.amount),
-      category: form.category.trim(),
+      categoryId: form.categoryId,
       transactionType: form.transactionType as Transaction["transactionType"],
       date: new Date(form.date).toISOString(),
       note: form.note.trim() || undefined,
@@ -89,7 +100,6 @@ export default function EditTransactionModal({
         <form onSubmit={handleSubmit} noValidate>
           <div className="modal-body">
             <div className="modal-form">
-              {/* Title */}
               <div className="form-field">
                 <label className="form-label">Title</label>
                 <input
@@ -105,7 +115,6 @@ export default function EditTransactionModal({
                 )}
               </div>
 
-              {/* Amount + Type */}
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Amount (LKR)</label>
@@ -136,21 +145,15 @@ export default function EditTransactionModal({
                 </div>
               </div>
 
-              {/* Category + Date */}
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Category</label>
-                  <input
-                    className="form-input"
-                    type="text"
-                    placeholder="e.g. Food"
-                    value={form.category}
-                    onChange={set("category")}
-                    maxLength={100}
+                  <CategorySelect
+                    value={form.categoryId}
+                    onChange={(id) =>
+                      setForm((prev) => ({ ...prev, categoryId: id }))
+                    }
                   />
-                  {errors.category && (
-                    <span className="form-error">{errors.category}</span>
-                  )}
                 </div>
 
                 <div className="form-field">
@@ -167,7 +170,6 @@ export default function EditTransactionModal({
                 </div>
               </div>
 
-              {/* Note */}
               <div className="form-field">
                 <label className="form-label">Note (optional)</label>
                 <textarea

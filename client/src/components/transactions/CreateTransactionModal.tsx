@@ -1,8 +1,9 @@
 import { createPortal } from "react-dom";
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
-import type { Transaction } from "./types";
 import type { CreateTransactionPayload } from "../../services/transactionService";
+import type { Transaction } from "./types";
+import CategorySelect from "./CategorySelect";
 
 interface Props {
   isCreating: boolean;
@@ -20,18 +21,20 @@ export default function CreateTransactionModal({
   const [form, setForm] = useState({
     title: "",
     amount: "",
-    category: "",
-    transactionType: "expense",
+    categoryId: null as string | null,
+    transactionType: "expense" as Transaction["transactionType"],
     date: todayInputDate(),
     note: "",
   });
 
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof typeof form, string>>
-  >({});
+  const [errors, setErrors] = useState<{
+    title?: string;
+    amount?: string;
+    date?: string;
+  }>({});
 
   const set =
-    (field: keyof typeof form) =>
+    (field: "title" | "amount" | "transactionType" | "date" | "note") =>
     (
       e: React.ChangeEvent<
         HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -45,26 +48,23 @@ export default function CreateTransactionModal({
     const amt = Number(form.amount);
     if (!form.amount || isNaN(amt) || amt <= 0)
       next.amount = "Enter a valid amount";
-    if (!form.category.trim()) next.category = "Category is required";
     if (!form.date) next.date = "Date is required";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     if (!validate()) return;
 
-    const payload: CreateTransactionPayload = {
+    onSave({
       title: form.title.trim(),
       amount: Number(form.amount),
-      category: form.category.trim(),
-      transactionType: form.transactionType as Transaction["transactionType"],
+      categoryId: form.categoryId,
+      transactionType: form.transactionType,
       date: new Date(form.date).toISOString(),
       note: form.note.trim() || undefined,
-    };
-
-    onSave(payload);
+    });
   };
 
   return createPortal(
@@ -139,17 +139,12 @@ export default function CreateTransactionModal({
               <div className="form-row">
                 <div className="form-field">
                   <label className="form-label">Category</label>
-                  <input
-                    className="form-input"
-                    type="text"
-                    placeholder="e.g. Food"
-                    value={form.category}
-                    onChange={set("category")}
-                    maxLength={100}
+                  <CategorySelect
+                    value={form.categoryId}
+                    onChange={(id) =>
+                      setForm((prev) => ({ ...prev, categoryId: id }))
+                    }
                   />
-                  {errors.category && (
-                    <span className="form-error">{errors.category}</span>
-                  )}
                 </div>
 
                 <div className="form-field">

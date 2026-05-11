@@ -1,8 +1,15 @@
+export interface CategoryRef {
+  id: string;
+  name: string;
+  color: string;
+  type: "income" | "expense" | "both";
+}
+
 export interface Transaction {
   id: string;
   title: string;
   transactionType: "income" | "expense";
-  category: string;
+  categoryId: CategoryRef | null;
   date: string;
   amount: number;
   note?: string;

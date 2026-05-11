@@ -29,17 +29,19 @@ interface SingleTransactionResponse {
   data: { transaction: Transaction };
 }
 
-export type UpdateTransactionPayload = Partial<
-  Pick<
-    Transaction,
-    "title" | "amount" | "category" | "transactionType" | "date" | "note"
-  >
->;
+export type UpdateTransactionPayload = {
+  title?: string;
+  amount?: number;
+  categoryId?: string | null;
+  transactionType?: Transaction["transactionType"];
+  date?: string;
+  note?: string;
+};
 
 export type CreateTransactionPayload = {
   title: string;
   amount: number;
-  category: string;
+  categoryId?: string | null;
   transactionType: Transaction["transactionType"];
   date?: string;
   note?: string;

@@ -1,4 +1,10 @@
-import { LayoutDashboard, ArrowRightLeft, Tag, Folders, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  ArrowRightLeft,
+  Tag,
+  Folders,
+  LogOut,
+} from "lucide-react";
 import SidebarItem from "./SidebarItem";
 import { useAuth } from "../../context/AuthContext";
 
@@ -20,7 +26,6 @@ export default function Sidebar() {
           to="/transactions"
         />
         <SidebarItem icon={Tag} label="Categories" to="/categories" />
-        <SidebarItem icon={Folders} label="Budgets" to="/budgets" />
       </nav>
 
       {/* Logout button typically pushed to bottom, so we add an auto margin wrapper if needed. 

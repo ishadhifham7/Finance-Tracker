@@ -47,6 +47,7 @@ export default function TransactionRow({
   };
 
   const isIncome = transaction.transactionType === "income";
+  const cat = transaction.categoryId;
 
   return (
     <tr className="tx-row">
@@ -65,7 +66,26 @@ export default function TransactionRow({
 
       {/* Category */}
       <td className="tx-td tx-col-category">
-        <span className="tx-category-pill">{transaction.category}</span>
+        {cat ? (
+          <span
+            className="tx-category-pill"
+            style={{
+              borderColor: `${cat.color}55`,
+              color: cat.color,
+              backgroundColor: `${cat.color}12`,
+            }}
+          >
+            <span
+              className="tx-category-dot"
+              style={{ backgroundColor: cat.color }}
+            />
+            {cat.name}
+          </span>
+        ) : (
+          <span className="tx-category-pill tx-category-empty">
+            Uncategorized
+          </span>
+        )}
       </td>
 
       {/* Date */}

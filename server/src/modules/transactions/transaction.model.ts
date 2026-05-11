@@ -7,7 +7,6 @@ export interface ITransaction extends Document {
   userId: Types.ObjectId;
   title: string;
   amount: number;
-  category: string;
   categoryId?: Types.ObjectId | null;
   transactionType: TransactionType;
   date: Date;
@@ -35,12 +34,6 @@ const TransactionSchema: Schema<ITransaction> = new Schema(
       required: [true, "Amount is required"],
       min: [0.01, "Amount must be greater than 0"],
       set: (v: number) => Math.round(v * 100) / 100,
-    },
-    category: {
-      type: String,
-      required: [true, "Category is required"],
-      trim: true,
-      maxlength: 100,
     },
     transactionType: {
       type: String,
@@ -83,7 +76,7 @@ const TransactionSchema: Schema<ITransaction> = new Schema(
 
 TransactionSchema.index({ userId: 1, date: -1, _id: -1 });
 TransactionSchema.index({ userId: 1, transactionType: 1, date: -1 });
-TransactionSchema.index({ userId: 1, category: 1, date: -1 });
+TransactionSchema.index({ userId: 1, categoryId: 1, date: -1 });
 TransactionSchema.index({ userId: 1, amount: -1 });
 
 const Transaction: Model<ITransaction> =

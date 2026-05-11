@@ -17,11 +17,13 @@ const amountSchema = z
   .positive("Amount must be greater than 0")
   .max(1_000_000_000_000, "Amount is too large");
 
-const categorySchema = z
-  .string({ error: "Category is required" })
-  .trim()
-  .min(1, "Category cannot be empty")
-  .max(100, "Category must be 100 characters or fewer");
+const categoryIdSchema = z
+  .string()
+  .refine((v) => mongoose.isValidObjectId(v), {
+    message: "categoryId must be a valid id",
+  })
+  .nullable()
+  .optional();
 
 const transactionTypeSchema = z.enum(["income", "expense"], {
   error: "transactionType must be 'income' or 'expense'",
@@ -39,7 +41,7 @@ export const createTransactionSchema = z
   .object({
     title: titleSchema,
     amount: amountSchema,
-    category: categorySchema,
+    categoryId: categoryIdSchema,
     transactionType: transactionTypeSchema,
     date: dateSchema.optional(),
     note: noteSchema,
@@ -50,7 +52,7 @@ export const updateTransactionSchema = z
   .object({
     title: titleSchema.optional(),
     amount: amountSchema.optional(),
-    category: categorySchema.optional(),
+    categoryId: categoryIdSchema,
     transactionType: transactionTypeSchema.optional(),
     date: dateSchema.optional(),
     note: noteSchema,
@@ -70,7 +72,6 @@ export const listTransactionsQuerySchema = z
     limit: z.coerce.number().int().min(1).max(100).default(20),
     search: z.string().trim().min(1).max(200).optional(),
     type: transactionTypeSchema.optional(),
-    category: z.string().trim().min(1).max(100).optional(),
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),
     sort: z.enum(["newest", "oldest", "highest", "lowest"]).default("newest"),

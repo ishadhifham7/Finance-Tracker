@@ -26,7 +26,6 @@ const buildListFilter = (
   const filter: QueryFilter<ITransaction> = { userId };
 
   if (query.type) filter.transactionType = query.type;
-  if (query.category) filter.category = query.category;
 
   if (query.startDate || query.endDate) {
     filter.date = {};
@@ -36,7 +35,7 @@ const buildListFilter = (
 
   if (query.search) {
     const re = new RegExp(escapeRegex(query.search), "i");
-    filter.$or = [{ title: re }, { note: re }, { category: re }];
+    filter.$or = [{ title: re }, { note: re }];
   }
 
   return filter;
@@ -67,6 +66,7 @@ export const listTransactions = async (
       .sort(sort)
       .skip(skip)
       .limit(query.limit)
+      .populate("categoryId", "name color type")
       .exec(),
     Transaction.countDocuments(filter).exec(),
   ]);
@@ -90,7 +90,9 @@ export const getTransactionById = async (
   userId: Types.ObjectId,
   id: string,
 ): Promise<ITransaction> => {
-  const tx = await Transaction.findOne({ _id: id, userId }).exec();
+  const tx = await Transaction.findOne({ _id: id, userId })
+    .populate("categoryId", "name color type")
+    .exec();
   if (!tx) throw new ApiError(404, "Transaction not found");
   return tx;
 };
@@ -99,15 +101,16 @@ export const createTransaction = async (
   userId: Types.ObjectId,
   input: CreateTransactionInput,
 ): Promise<ITransaction> => {
-  return Transaction.create({
+  const tx = await Transaction.create({
     userId,
     title: input.title,
     amount: input.amount,
-    category: input.category,
+    categoryId: input.categoryId ?? null,
     transactionType: input.transactionType,
     date: input.date ?? new Date(),
     note: input.note,
   });
+  return tx.populate("categoryId", "name color type");
 };
 
 export const updateTransaction = async (
@@ -119,7 +122,9 @@ export const updateTransaction = async (
     { _id: id, userId },
     { $set: input },
     { new: true, runValidators: true, context: "query" },
-  ).exec();
+  )
+    .populate("categoryId", "name color type")
+    .exec();
 
   if (!tx) throw new ApiError(404, "Transaction not found");
   return tx;

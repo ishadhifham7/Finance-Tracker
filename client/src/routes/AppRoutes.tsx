@@ -9,7 +9,6 @@ import Signup from "../pages/Auth/Signup";
 import Dashboard from "../pages/Dashboard";
 import Transactions from "../pages/Transactions";
 import Categories from "../pages/Categories";
-import Budgets from "../pages/Budgets";
 import NotFound from "../pages/NotFound";
 
 export default function AppRoutes() {
@@ -27,7 +26,6 @@ export default function AppRoutes() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/categories" element={<Categories />} />
-          <Route path="/budgets" element={<Budgets />} />
         </Route>
       </Route>
 
