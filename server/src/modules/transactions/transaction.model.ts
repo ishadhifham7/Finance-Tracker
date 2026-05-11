@@ -8,6 +8,7 @@ export interface ITransaction extends Document {
   title: string;
   amount: number;
   category: string;
+  categoryId?: Types.ObjectId | null;
   transactionType: TransactionType;
   date: Date;
   note?: string;
@@ -59,6 +60,11 @@ const TransactionSchema: Schema<ITransaction> = new Schema(
       trim: true,
       maxlength: 500,
       default: undefined,
+    },
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
     },
   },
   {
