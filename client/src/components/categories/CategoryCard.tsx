@@ -1,5 +1,11 @@
 import { useRef, useState } from "react";
-import { MoreHorizontal, TrendingUp, TrendingDown, Minus, Wallet } from "lucide-react";
+import {
+  MoreHorizontal,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Wallet,
+} from "lucide-react";
 import type { Category } from "./types";
 import CategoryActionMenu from "./CategoryActionMenu";
 
@@ -7,7 +13,7 @@ interface Props {
   category: Category;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
-  onAllocateBudget: (id: string) => void;
+  onAllocateBudget: (id: string, anchorRect: DOMRect) => void;
 }
 
 const TYPE_CONFIG = {
@@ -83,7 +89,12 @@ export default function CategoryCard({
           <button
             className="cat-allocate-btn"
             type="button"
-            onClick={() => onAllocateBudget(category.id)}
+            onClick={(e) =>
+              onAllocateBudget(
+                category.id,
+                (e.currentTarget as HTMLButtonElement).getBoundingClientRect(),
+              )
+            }
           >
             <Wallet size={13} strokeWidth={2} />
             Allocate Budget

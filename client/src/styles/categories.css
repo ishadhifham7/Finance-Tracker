@@ -1,4 +1,19 @@
 /* ─── Categories Page ─── */
+.cat-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 16px 0;
+  letter-spacing: -0.01em;
+}
+
+/* Base header */
 .cat-header {
   display: flex;
   align-items: flex-end;
@@ -90,7 +105,8 @@
   background-color: var(--cat-color, #6b7280);
   border-radius: 18px 0 0 18px;
   /* Subtle glow using the category color */
-  box-shadow: 2px 0 12px color-mix(in srgb, var(--cat-color, #6b7280) 40%, transparent);
+  box-shadow: 2px 0 12px
+    color-mix(in srgb, var(--cat-color, #6b7280) 40%, transparent);
 }
 
 .cat-card-body {
@@ -243,6 +259,160 @@
     0 8px 32px rgba(0, 0, 0, 0.5),
     0 2px 8px rgba(0, 0, 0, 0.3);
   animation: cat-dropdown-in 0.12s ease;
+}
+
+/* ─── Allocate Budget Popover ─── */
+.budget-popover {
+  position: fixed;
+  z-index: 10000;
+  background: rgba(14, 14, 18, 0.96);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 14px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: budget-pop-in 0.12s ease;
+}
+
+@keyframes budget-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.budget-popover-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.budget-popover-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.budget-popover-sub {
+  margin: 3px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.budget-popover-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.budget-popover-close:hover {
+  background: var(--bg-glass-hover);
+  color: var(--text-main);
+}
+
+.budget-popover-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.budget-popover-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.budget-popover-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  outline: none;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.budget-popover-input:focus {
+  border-color: rgba(0, 255, 102, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.budget-popover-error {
+  font-size: 0.75rem;
+  color: #ff4d6d;
+  margin-top: 2px;
+}
+
+.budget-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.budget-popover-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.budget-popover-btn.ghost {
+  background: var(--bg-glass);
+  border-color: var(--border-glass);
+  color: var(--text-muted);
+}
+
+.budget-popover-btn.ghost:hover:not(:disabled) {
+  background: var(--bg-glass-hover);
+  color: var(--text-main);
+}
+
+.budget-popover-btn.primary {
+  background: rgba(0, 255, 102, 0.1);
+  border-color: rgba(0, 255, 102, 0.3);
+  color: var(--accent-neon);
+}
+
+.budget-popover-btn.primary:hover:not(:disabled) {
+  background: rgba(0, 255, 102, 0.18);
+  border-color: rgba(0, 255, 102, 0.5);
+}
+
+.budget-popover-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @keyframes cat-dropdown-in {
@@ -410,6 +580,210 @@
   background-size: 600px 100%;
   animation: cat-shimmer 1.5s infinite linear;
   flex-shrink: 0;
+}
+
+/* ─── Active Budgets Section ─── */
+.active-budgets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+  .active-budgets-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.active-budget-card {
+  position: relative;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glass);
+  border-radius: 18px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.active-budget-card.exceeded {
+  border-color: rgba(255, 77, 109, 0.25);
+  box-shadow:
+    0 4px 24px rgba(255, 77, 109, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.active-budget-card:hover {
+  border-color: var(--border-light);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transform: translateY(-1px);
+}
+
+.active-budget-card.exceeded:hover {
+  border-color: rgba(255, 77, 109, 0.4);
+}
+
+.active-budget-color-bar {
+  width: 4px;
+  flex-shrink: 0;
+  background-color: var(--cat-color, #6b7280);
+  border-radius: 18px 0 0 18px;
+  box-shadow: 2px 0 12px
+    color-mix(in srgb, var(--cat-color, #6b7280) 40%, transparent);
+}
+
+.active-budget-body {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.active-budget-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.active-budget-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.active-budget-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-budget-amounts {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.amount-spent {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.amount-spent.danger {
+  color: #ff4d6d;
+}
+
+.amount-divider {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.amount-limit {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.active-budget-status {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+.active-budget-status.danger {
+  color: #ff4d6d;
+}
+
+.active-budget-ring-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.budget-ring-svg {
+  transform: rotate(-90deg);
+}
+
+.budget-ring-progress {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.budget-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.budget-pct {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-neon);
+}
+
+.budget-pct.danger {
+  color: #ff4d6d;
+}
+
+.active-budget-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-glass);
+}
+
+.active-budget-period {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Base generic skeleton classes */
+.bg-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 600px 100%;
+  animation: cat-shimmer 1.5s infinite linear;
+}
+.skeleton-pulse {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* ─── Empty State ─── */

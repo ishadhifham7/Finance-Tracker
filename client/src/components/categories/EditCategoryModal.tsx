@@ -7,8 +7,13 @@ import type { UpdateCategoryPayload } from "../../services/categoryService";
 interface Props {
   category: Category;
   isUpdating: boolean;
-  onSave: (id: string, payload: UpdateCategoryPayload) => void;
+  onSave: (
+    id: string,
+    payload: UpdateCategoryPayload,
+    budgetAmount?: number,
+  ) => void;
   onClose: () => void;
+  budgetAmount?: number;
 }
 
 const PRESET_COLORS = [
@@ -33,11 +38,16 @@ export default function EditCategoryModal({
   isUpdating,
   onSave,
   onClose,
+  budgetAmount,
 }: Props) {
   const [name, setName] = useState(category.name);
   const [type, setType] = useState<CategoryType>(category.type);
   const [color, setColor] = useState(category.color);
   const [nameError, setNameError] = useState("");
+  const [budgetInput, setBudgetInput] = useState(
+    budgetAmount !== undefined ? String(budgetAmount) : "",
+  );
+  const [budgetError, setBudgetError] = useState("");
 
   const validate = (): boolean => {
     if (!name.trim()) {
@@ -49,6 +59,16 @@ export default function EditCategoryModal({
       return false;
     }
     setNameError("");
+
+    if (budgetAmount !== undefined) {
+      const value = Number(budgetInput);
+      if (!budgetInput || isNaN(value) || value <= 0) {
+        setBudgetError("Enter a valid budget amount");
+        return false;
+      }
+      setBudgetError("");
+    }
+
     return true;
   };
 
@@ -61,12 +81,23 @@ export default function EditCategoryModal({
     if (type !== category.type) payload.type = type;
     if (color !== category.color) payload.color = color;
 
-    if (Object.keys(payload).length === 0) {
+    const hasBudget = budgetAmount !== undefined;
+    const nextBudgetValue = hasBudget ? Number(budgetInput) : undefined;
+    const budgetChanged =
+      hasBudget && !isNaN(nextBudgetValue as number)
+        ? nextBudgetValue !== budgetAmount
+        : false;
+
+    if (Object.keys(payload).length === 0 && !budgetChanged) {
       onClose();
       return;
     }
 
-    onSave(category.id, payload);
+    onSave(
+      category.id,
+      payload,
+      budgetChanged ? (nextBudgetValue as number) : undefined,
+    );
   };
 
   return createPortal(
@@ -108,25 +139,27 @@ export default function EditCategoryModal({
                   maxLength={100}
                   autoFocus
                 />
-                {nameError && (
-                  <span className="form-error">{nameError}</span>
-                )}
+                {nameError && <span className="form-error">{nameError}</span>}
               </div>
 
               {/* Type toggle */}
               <div className="form-field">
                 <label className="form-label">Type</label>
                 <div className="cat-type-toggle">
-                  {(["income", "expense", "both"] as CategoryType[]).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      className={`cat-type-toggle-btn${type === t ? " active" : ""} cat-toggle-${t}`}
-                      onClick={() => setType(t)}
-                    >
-                      {t === "both" ? "All types" : t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
+                  {(["income", "expense", "both"] as CategoryType[]).map(
+                    (t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        className={`cat-type-toggle-btn${type === t ? " active" : ""} cat-toggle-${t}`}
+                        onClick={() => setType(t)}
+                      >
+                        {t === "both"
+                          ? "All types"
+                          : t.charAt(0).toUpperCase() + t.slice(1)}
+                      </button>
+                    ),
+                  )}
                 </div>
               </div>
 
@@ -147,7 +180,11 @@ export default function EditCategoryModal({
                   <label className="cat-color-custom" title="Custom color">
                     <span
                       className="cat-color-swatch cat-color-custom-swatch"
-                      style={{ backgroundColor: PRESET_COLORS.includes(color) ? "#374151" : color }}
+                      style={{
+                        backgroundColor: PRESET_COLORS.includes(color)
+                          ? "#374151"
+                          : color,
+                      }}
                     >
                       {!PRESET_COLORS.includes(color) && (
                         <span className="cat-color-check">✓</span>
@@ -172,6 +209,27 @@ export default function EditCategoryModal({
                   <span className="cat-color-hex">{color}</span>
                 </div>
               </div>
+
+              {budgetAmount !== undefined && (
+                <div className="form-field">
+                  <label className="form-label">Budget Amount (LKR)</label>
+                  <input
+                    className="form-input"
+                    type="number"
+                    placeholder="Enter monthly budget amount"
+                    min="0.01"
+                    step="0.01"
+                    value={budgetInput}
+                    onChange={(e) => {
+                      setBudgetInput(e.target.value);
+                      if (budgetError) setBudgetError("");
+                    }}
+                  />
+                  {budgetError && (
+                    <span className="form-error">{budgetError}</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
