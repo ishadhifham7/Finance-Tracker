@@ -1,4 +1,4 @@
-import { LayoutDashboard, ArrowRightLeft, Folders, LogOut } from "lucide-react";
+import { LayoutDashboard, ArrowRightLeft, Tag, Folders, LogOut } from "lucide-react";
 import SidebarItem from "./SidebarItem";
 import { useAuth } from "../../context/AuthContext";
 
@@ -19,6 +19,7 @@ export default function Sidebar() {
           label="Transactions"
           to="/transactions"
         />
+        <SidebarItem icon={Tag} label="Categories" to="/categories" />
         <SidebarItem icon={Folders} label="Budgets" to="/budgets" />
       </nav>
 
