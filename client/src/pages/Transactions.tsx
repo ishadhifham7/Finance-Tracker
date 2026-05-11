@@ -1,28 +1,42 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import TransactionTable from "../components/transactions/TransactionTable";
 import FilterBar from "../components/transactions/FilterBar";
 import DeleteConfirmModal from "../components/transactions/DeleteConfirmModal";
 import EditTransactionModal from "../components/transactions/EditTransactionModal";
+import CreateTransactionModal from "../components/transactions/CreateTransactionModal";
 import { useTransactions } from "../hooks/useTransactions";
-import type { Transaction, TransactionFilters } from "../components/transactions/types";
+import type {
+  Transaction,
+  TransactionFilters,
+} from "../components/transactions/types";
 import { DEFAULT_FILTERS } from "../components/transactions/types";
 import {
   deleteTransaction,
+  createTransaction,
   updateTransaction,
   type UpdateTransactionPayload,
+  type CreateTransactionPayload,
 } from "../services/transactionService";
 
 export default function Transactions() {
   const [filters, setFilters] = useState<TransactionFilters>(DEFAULT_FILTERS);
 
-  const { transactions, isLoading, refresh, removeTransaction, replaceTransaction } =
-    useTransactions(filters);
+  const {
+    transactions,
+    isLoading,
+    refresh,
+    removeTransaction,
+    replaceTransaction,
+  } = useTransactions(filters);
 
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
-  const [editTarget, setEditTarget]     = useState<Transaction | null>(null);
-  const [isDeleting, setIsDeleting]     = useState(false);
-  const [isUpdating, setIsUpdating]     = useState(false);
+  const [editTarget, setEditTarget] = useState<Transaction | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleEditOpen = (id: string) => {
     setEditTarget(transactions.find((t) => t.id === id) ?? null);
@@ -30,6 +44,10 @@ export default function Transactions() {
 
   const handleDeleteOpen = (id: string) => {
     setDeleteTarget(transactions.find((t) => t.id === id) ?? null);
+  };
+
+  const handleCreateOpen = () => {
+    setIsCreateOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
@@ -48,7 +66,10 @@ export default function Transactions() {
     }
   };
 
-  const handleUpdateSave = async (id: string, payload: UpdateTransactionPayload) => {
+  const handleUpdateSave = async (
+    id: string,
+    payload: UpdateTransactionPayload,
+  ) => {
     setIsUpdating(true);
     try {
       const updated = await updateTransaction(id, payload);
@@ -62,13 +83,37 @@ export default function Transactions() {
     }
   };
 
+  const handleCreateSave = async (payload: CreateTransactionPayload) => {
+    setIsCreating(true);
+    try {
+      await createTransaction(payload);
+      setIsCreateOpen(false);
+      toast.success("Transaction created");
+      refresh();
+    } catch {
+      toast.error("Failed to create. Please try again.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const handleReset = () => setFilters(DEFAULT_FILTERS);
 
   return (
     <div>
-      <header className="page-header">
-        <h1>Transactions</h1>
-        <p>Track and manage your recent activity.</p>
+      <header className="page-header tx-header">
+        <div>
+          <h1>Transactions</h1>
+          <p>Track and manage your recent activity.</p>
+        </div>
+        <button
+          className="modal-btn modal-btn-primary tx-add-btn"
+          type="button"
+          onClick={handleCreateOpen}
+        >
+          <Plus size={13} />
+          New Transaction
+        </button>
       </header>
 
       <div className="tx-page">
@@ -101,6 +146,14 @@ export default function Transactions() {
           isUpdating={isUpdating}
           onSave={handleUpdateSave}
           onClose={() => setEditTarget(null)}
+        />
+      )}
+
+      {isCreateOpen && (
+        <CreateTransactionModal
+          isCreating={isCreating}
+          onSave={handleCreateSave}
+          onClose={() => setIsCreateOpen(false)}
         />
       )}
     </div>

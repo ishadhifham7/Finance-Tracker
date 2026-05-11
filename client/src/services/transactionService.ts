@@ -36,6 +36,15 @@ export type UpdateTransactionPayload = Partial<
   >
 >;
 
+export type CreateTransactionPayload = {
+  title: string;
+  amount: number;
+  category: string;
+  transactionType: Transaction["transactionType"];
+  date?: string;
+  note?: string;
+};
+
 export const fetchTransactions = async (
   params: FetchTransactionsParams = {},
 ): Promise<ListTransactionsResponse["data"]> => {
@@ -55,6 +64,16 @@ export const updateTransaction = async (
 ): Promise<Transaction> => {
   const { data } = await api.patch<SingleTransactionResponse>(
     `/transactions/${id}`,
+    payload,
+  );
+  return data.data.transaction;
+};
+
+export const createTransaction = async (
+  payload: CreateTransactionPayload,
+): Promise<Transaction> => {
+  const { data } = await api.post<SingleTransactionResponse>(
+    "/transactions",
     payload,
   );
   return data.data.transaction;
