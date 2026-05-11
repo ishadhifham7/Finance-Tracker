@@ -391,6 +391,38 @@ body {
   line-height: 1;
 }
 
+.bento-stat-value.muted {
+  color: var(--text-muted);
+}
+
+.bento-skeleton-line {
+  display: inline-block;
+  height: 20px;
+  width: 70%;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 600px 100%;
+  animation: bento-shimmer 1.5s infinite linear;
+}
+
+.bento-skeleton-value {
+  height: 26px;
+}
+
+@keyframes bento-shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
 .bento-stat-change {
   display: flex;
   align-items: center;

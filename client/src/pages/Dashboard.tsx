@@ -3,41 +3,10 @@ import {
   TrendingDown,
   Wallet,
   Percent,
-  ArrowUpRight,
-  ArrowDownLeft,
   MoreHorizontal,
 } from "lucide-react";
-
-const statCards = [
-  {
-    label: "Total Balance",
-    value: "$0.00",
-    change: "+0%",
-    positive: true,
-    icon: Wallet,
-  },
-  {
-    label: "Monthly Income",
-    value: "$0.00",
-    change: "+0%",
-    positive: true,
-    icon: TrendingUp,
-  },
-  {
-    label: "Monthly Expenses",
-    value: "$0.00",
-    change: "+0%",
-    positive: false,
-    icon: TrendingDown,
-  },
-  {
-    label: "Savings Rate",
-    value: "0%",
-    change: "+0%",
-    positive: true,
-    icon: Percent,
-  },
-];
+import { useDashboardSummary } from "../hooks/useDashboardSummary";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const recentTransactions = [
   { name: "No transactions yet", amount: "", type: "empty", category: "" },
@@ -53,6 +22,34 @@ const budgetItems = [
 const chartMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
 export default function Dashboard() {
+  const { summary, isLoading, error } = useDashboardSummary();
+
+  const statCards = [
+    {
+      label: "Total Balance",
+      value: summary ? formatCurrency(summary.totalBalance) : "—",
+      icon: Wallet,
+    },
+    {
+      label: "Monthly Income",
+      value: summary ? formatCurrency(summary.monthlyIncome) : "—",
+      icon: TrendingUp,
+    },
+    {
+      label: "Monthly Expenses",
+      value: summary ? formatCurrency(summary.monthlyExpenses) : "—",
+      icon: TrendingDown,
+    },
+    {
+      label: "Saving Rate",
+      value:
+        summary && Number.isFinite(summary.savingRate)
+          ? `${summary.savingRate.toFixed(1)}%`
+          : "—",
+      icon: Percent,
+    },
+  ];
+
   return (
     <div className="dashboard-page">
       <header className="page-header">
@@ -63,6 +60,11 @@ export default function Dashboard() {
       <div className="bento-grid">
         {statCards.map((card) => {
           const Icon = card.icon;
+          const valueNode = isLoading ? (
+            <span className="bento-skeleton-line bento-skeleton-value" />
+          ) : (
+            card.value
+          );
           return (
             <div key={card.label} className="bento-card bento-stat">
               <div className="bento-stat-top">
@@ -71,16 +73,12 @@ export default function Dashboard() {
                   <Icon size={18} />
                 </div>
               </div>
-              <div className="bento-stat-value">{card.value}</div>
               <div
-                className={`bento-stat-change ${card.positive ? "positive" : "negative"}`}
+                className={`bento-stat-value${
+                  !isLoading && error ? " muted" : ""
+                }`}
               >
-                {card.positive ? (
-                  <ArrowUpRight size={14} />
-                ) : (
-                  <ArrowDownLeft size={14} />
-                )}
-                {card.change} this month
+                {valueNode}
               </div>
             </div>
           );
