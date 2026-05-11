@@ -7,6 +7,8 @@ export interface FetchTransactionsParams {
   startDate?: string;
   endDate?: string;
   sort?: "newest" | "oldest" | "highest" | "lowest";
+  limit?: number;
+  page?: number;
 }
 
 interface ListTransactionsResponse {
@@ -87,9 +89,25 @@ export interface MonthlyTrend {
   expenses: number;
 }
 
+export interface ExpenseDistributionItem {
+  category: string;
+  color: string;
+  amount: number;
+}
+
 export const fetchMonthlyTrends = async (): Promise<MonthlyTrend[]> => {
   const { data } = await api.get<{ status: string; data: MonthlyTrend[] }>(
     "/transactions/monthly-trends",
   );
+  return data.data;
+};
+
+export const fetchExpenseDistribution = async (): Promise<
+  ExpenseDistributionItem[]
+> => {
+  const { data } = await api.get<{
+    status: string;
+    data: ExpenseDistributionItem[];
+  }>("/transactions/expense-distribution");
   return data.data;
 };

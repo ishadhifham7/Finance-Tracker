@@ -222,6 +222,12 @@ export interface MonthlyTrendPoint {
   expenses: number;
 }
 
+export interface ExpenseDistributionItem {
+  category: string;
+  color: string;
+  amount: number;
+}
+
 interface MonthlyTrendGroup {
   _id: string;
   income: number;
@@ -287,4 +293,59 @@ export const getMonthlyTrends = async (
   }
 
   return result;
+};
+
+export const getExpenseDistribution = async (
+  userId: Types.ObjectId,
+): Promise<ExpenseDistributionItem[]> => {
+  const rows = await Transaction.aggregate<ExpenseDistributionItem>([
+    {
+      $match: {
+        userId,
+        transactionType: "expense",
+        categoryId: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$categoryId",
+        amount: { $sum: "$amount" },
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        let: { categoryId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$_id", "$$categoryId"] },
+                  { $eq: ["$userId", userId] },
+                ],
+              },
+            },
+          },
+          { $project: { name: 1, color: 1 } },
+        ],
+        as: "category",
+      },
+    },
+    { $unwind: "$category" },
+    {
+      $project: {
+        _id: 0,
+        category: "$category.name",
+        color: "$category.color",
+        amount: 1,
+      },
+    },
+    { $sort: { amount: -1 } },
+  ]).exec();
+
+  return rows.map((row) => ({
+    ...row,
+    amount: round2(row.amount),
+  }));
 };

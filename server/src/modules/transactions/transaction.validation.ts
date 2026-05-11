@@ -83,8 +83,12 @@ export const listTransactionsQuerySchema = z
   );
 
 export const monthlyTrendsQuerySchema = z.object({}).strict();
+export const expenseDistributionQuerySchema = z.object({}).strict();
 
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
 export type MonthlyTrendsQuery = z.infer<typeof monthlyTrendsQuerySchema>;
+export type ExpenseDistributionQuery = z.infer<
+  typeof expenseDistributionQuerySchema
+>;

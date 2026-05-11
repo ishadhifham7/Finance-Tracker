@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   TrendingUp,
   TrendingDown,
@@ -13,25 +14,51 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import { useDashboardSummary } from "../hooks/useDashboardSummary";
 import { useMonthlyTrends } from "../hooks/useMonthlyTrends";
+import { useExpenseDistribution } from "../hooks/useExpenseDistribution";
+import { useRecentTransactions } from "../hooks/useRecentTransactions";
+import { useBudgets } from "../hooks/useBudgets";
 import { formatCurrency } from "../utils/formatCurrency";
 
-const recentTransactions = [
-  { name: "No transactions yet", amount: "", type: "empty", category: "" },
-];
+const formatTransactionDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 
-const budgetItems = [
-  { label: "Food & Dining", spent: 0, limit: 500, color: "#00ff66" },
-  { label: "Transport", spent: 0, limit: 200, color: "#00cfff" },
-  { label: "Entertainment", spent: 0, limit: 150, color: "#a855f7" },
-  { label: "Shopping", spent: 0, limit: 300, color: "#f59e0b" },
-];
+const formatTransactionAmount = (
+  amount: number,
+  type: "income" | "expense",
+) => {
+  const sign = type === "income" ? "+" : "-";
+  const value = Math.abs(amount).toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return `${sign}${value} LKR`;
+};
+
+const formatBudgetAmount = (amount: number) =>
+  Math.round(amount).toLocaleString("en-US");
 
 export default function Dashboard() {
   const { summary, isLoading, error } = useDashboardSummary();
   const { trends, isLoading: isLoadingTrends } = useMonthlyTrends();
+  const { distribution, isLoading: isLoadingDistribution } =
+    useExpenseDistribution();
+  const { transactions: recentTransactions, isLoading: isLoadingRecent } =
+    useRecentTransactions();
+  const { budgets, isLoading: isBudgetsLoading } = useBudgets();
+
+  const totalExpenseDistribution = useMemo(
+    () => distribution.reduce((sum, item) => sum + item.amount, 0),
+    [distribution],
+  );
 
   // Generate the last 6 months to ensure the chart always has 6 data points.
   // This pads missing months with 0s so lines draw completely from a 0 baseline.
@@ -119,9 +146,6 @@ export default function Dashboard() {
         <div className="bento-card bento-chart">
           <div className="bento-card-header">
             <span className="bento-card-title">Spending Overview</span>
-            <button className="bento-more-btn">
-              <MoreHorizontal size={16} />
-            </button>
           </div>
           <div
             className="bento-chart-area"
@@ -196,25 +220,48 @@ export default function Dashboard() {
         <div className="bento-card bento-transactions">
           <div className="bento-card-header">
             <span className="bento-card-title">Recent Transactions</span>
-            <a className="bento-view-all">View all</a>
+            <Link className="bento-view-all" to="/transactions">
+              View all
+            </Link>
           </div>
           <div className="bento-transaction-list">
-            {recentTransactions.map((tx, i) =>
-              tx.type === "empty" ? (
-                <div key={i} className="bento-tx-empty">
-                  No transactions yet
-                </div>
-              ) : (
-                <div key={i} className="bento-tx-row">
-                  <div className="bento-tx-info">
-                    <span className="bento-tx-name">{tx.name}</span>
-                    <span className="bento-tx-cat">{tx.category}</span>
+            {isLoadingRecent ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={`tx-skeleton-${i}`} className="bento-tx-row">
+                  <div className="bento-tx-info" style={{ width: "70%" }}>
+                    <span
+                      className="bento-skeleton-line"
+                      style={{ width: "75%", height: "8px" }}
+                    />
+                    <span
+                      className="bento-skeleton-line"
+                      style={{ width: "35%", height: "6px" }}
+                    />
                   </div>
-                  <span className={`bento-tx-amount ${tx.type}`}>
-                    {tx.amount}
+                  <span
+                    className="bento-skeleton-line"
+                    style={{ width: "70px", height: "8px" }}
+                  />
+                </div>
+              ))
+            ) : recentTransactions.length === 0 ? (
+              <div className="bento-tx-empty">No transactions yet</div>
+            ) : (
+              recentTransactions.map((tx) => (
+                <div key={tx.id} className="bento-tx-row">
+                  <div className="bento-tx-info">
+                    <span className="bento-tx-name" title={tx.title}>
+                      {tx.title}
+                    </span>
+                    <span className="bento-tx-cat">
+                      {formatTransactionDate(tx.date)}
+                    </span>
+                  </div>
+                  <span className={`bento-tx-amount ${tx.transactionType}`}>
+                    {formatTransactionAmount(tx.amount, tx.transactionType)}
                   </span>
                 </div>
-              ),
+              ))
             )}
           </div>
         </div>
@@ -222,30 +269,69 @@ export default function Dashboard() {
         <div className="bento-card bento-budgets">
           <div className="bento-card-header">
             <span className="bento-card-title">Budget Progress</span>
-            <a className="bento-view-all">Manage</a>
+            <Link className="bento-view-all" to="/categories">
+              Manage
+            </Link>
           </div>
           <div className="bento-budget-list">
-            {budgetItems.map((b) => {
-              const pct =
-                b.limit > 0 ? Math.min((b.spent / b.limit) * 100, 100) : 0;
-              return (
-                <div key={b.label} className="bento-budget-item">
+            {isBudgetsLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={`budget-skeleton-${i}`} className="bento-budget-item">
                   <div className="bento-budget-row">
-                    <span className="bento-budget-label">{b.label}</span>
-                    <span className="bento-budget-amount">
-                      ${b.spent}{" "}
-                      <span className="bento-budget-limit">/ ${b.limit}</span>
-                    </span>
+                    <span
+                      className="bento-skeleton-line"
+                      style={{ width: "40%", height: "10px" }}
+                    />
+                    <span
+                      className="bento-skeleton-line"
+                      style={{ width: "35%", height: "10px" }}
+                    />
                   </div>
                   <div className="bento-budget-track">
                     <div
-                      className="bento-budget-fill"
-                      style={{ width: `${pct}%`, background: b.color }}
+                      className="bento-skeleton-line"
+                      style={{ width: "100%", height: "100%" }}
                     />
                   </div>
                 </div>
-              );
-            })}
+              ))
+            ) : budgets.length === 0 ? (
+              <div className="bento-budget-empty">No budgets yet</div>
+            ) : (
+              budgets.map((b) => {
+                const pct = Math.min(Math.max(b.progressPercentage, 0), 100);
+                const spent = formatBudgetAmount(b.spentAmount);
+                const limit = formatBudgetAmount(b.budgetAmount);
+
+                return (
+                  <div key={b.id} className="bento-budget-item">
+                    <div className="bento-budget-row">
+                      <span
+                        className="bento-budget-label"
+                        title={b.category.name ?? "Unknown"}
+                      >
+                        {b.category.name ?? "Unknown"}
+                      </span>
+                      <span className="bento-budget-amount">
+                        {spent}{" "}
+                        <span className="bento-budget-limit">
+                          / {limit} LKR
+                        </span>
+                      </span>
+                    </div>
+                    <div className="bento-budget-track">
+                      <div
+                        className="bento-budget-fill"
+                        style={{
+                          width: `${pct}%`,
+                          background: "rgba(255, 255, 255, 0.85)",
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -259,48 +345,181 @@ export default function Dashboard() {
           }}
         >
           <div className="bento-card-header">
-            <span className="bento-card-title">Expense Breakdown</span>
-            <button className="bento-more-btn">
-              <MoreHorizontal size={16} />
-            </button>
+            <span className="bento-card-title">Expense Distribution</span>
           </div>
           <div
             style={{
               flex: 1,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              color: "var(--text-muted)",
-              border: "1px dashed var(--border)",
-              borderRadius: "8px",
-              margin: "16px 0 0",
+              justifyContent: "space-between",
+              position: "relative",
+              marginTop: "16px",
             }}
           >
-            [Pie Chart Placeholder]
-          </div>
-        </div>
+            {isLoadingDistribution ? (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  className="bento-skeleton-line"
+                  style={{ width: "100%", height: "80%", borderRadius: "8px" }}
+                />
+              </div>
+            ) : distribution.length > 0 ? (
+              <>
+                {/* Left Side: Donut Chart area */}
+                <div
+                  style={{
+                    width: "50%",
+                    height: "180px",
+                    position: "relative",
+                  }}
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={distribution}
+                        dataKey="amount"
+                        nameKey="category"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        stroke="none"
+                        paddingAngle={4}
+                        animationDuration={800}
+                        animationEasing="ease-out"
+                      >
+                        {distribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
 
-        <div className="bento-card bento-quickstats">
-          <div className="bento-card-header">
-            <span className="bento-card-title">This Month</span>
-          </div>
-          <div className="bento-quickstats-grid">
-            <div className="bento-qs-item">
-              <span className="bento-qs-label">Transactions</span>
-              <span className="bento-qs-value">0</span>
-            </div>
-            <div className="bento-qs-item">
-              <span className="bento-qs-label">Categories</span>
-              <span className="bento-qs-value">0</span>
-            </div>
-            <div className="bento-qs-item">
-              <span className="bento-qs-label">Avg / Day</span>
-              <span className="bento-qs-value">$0</span>
-            </div>
-            <div className="bento-qs-item">
-              <span className="bento-qs-label">Largest</span>
-              <span className="bento-qs-value">$0</span>
-            </div>
+                  {/* Center Text Wrapper */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--text-muted)",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      Total Expenses
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "1.05rem",
+                        fontWeight: 600,
+                        color: "var(--text)",
+                        textShadow: "0 0 10px rgba(255,255,255,0.1)",
+                      }}
+                    >
+                      {totalExpenseDistribution.toLocaleString("en-US")}{" "}
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--text-muted)",
+                          fontWeight: 400,
+                        }}
+                      >
+                        LKR
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Side: Legend Area */}
+                <div
+                  style={{
+                    width: "50%",
+                    paddingLeft: "24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    maxHeight: "180px",
+                    overflowY: "auto",
+                  }}
+                >
+                  {distribution.map((item) => (
+                    <div
+                      key={item.category}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          color: "var(--text-muted)",
+                          fontWeight: 500,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            backgroundColor: item.color,
+                            boxShadow: `0 0 8px ${item.color}80`,
+                          }}
+                        />
+                        {item.category}
+                      </div>
+                      <span
+                        style={{
+                          fontWeight: 600,
+                          color: "var(--text-main)",
+                          whiteSpace: "nowrap",
+                          marginLeft: "12px",
+                        }}
+                      >
+                        {item.amount.toLocaleString("en-US")}{" "}
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            color: "var(--text-muted)",
+                            fontWeight: 400,
+                          }}
+                        >
+                          LKR
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div
+                className="bento-chart-empty"
+                style={{ width: "100%", textAlign: "center" }}
+              >
+                No expenses yet
+              </div>
+            )}
           </div>
         </div>
       </div>

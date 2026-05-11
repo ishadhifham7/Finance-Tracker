@@ -3,6 +3,7 @@ import { protect } from "../../middlewares/auth.middleware";
 import {
   createTransaction,
   deleteTransaction,
+  getExpenseDistribution,
   getFinancialSummary,
   getMonthlyTrends,
   getTransaction,
@@ -14,6 +15,7 @@ const router = Router();
 
 router.use(protect);
 
+router.get("/expense-distribution", getExpenseDistribution);
 router.get("/monthly-trends", getMonthlyTrends);
 router.get("/summary", getFinancialSummary);
 

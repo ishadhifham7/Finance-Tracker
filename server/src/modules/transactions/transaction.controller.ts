@@ -6,6 +6,7 @@ import { AuthRequest } from "../auth/auth.types";
 import * as txService from "./transaction.service";
 import {
   createTransactionSchema,
+  expenseDistributionQuerySchema,
   listTransactionsQuerySchema,
   monthlyTrendsQuerySchema,
   transactionIdParamsSchema,
@@ -60,6 +61,19 @@ export const getMonthlyTrends = asyncHandler(
     const userId = requireUserId(req);
     const query = monthlyTrendsQuerySchema.parse(req.query);
     const data = await txService.getMonthlyTrends(userId, query);
+
+    res.status(200).json({
+      status: "success",
+      data,
+    });
+  },
+);
+
+export const getExpenseDistribution = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const userId = requireUserId(req);
+    expenseDistributionQuerySchema.parse(req.query);
+    const data = await txService.getExpenseDistribution(userId);
 
     res.status(200).json({
       status: "success",
