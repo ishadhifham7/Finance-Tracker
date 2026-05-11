@@ -4,6 +4,7 @@ import type { Transaction } from "../components/transactions/types";
 export interface FetchTransactionsParams {
   search?: string;
   type?: "income" | "expense";
+  category?: string;
   startDate?: string;
   endDate?: string;
   sort?: "newest" | "oldest" | "highest" | "lowest";

@@ -1,5 +1,6 @@
 import { QueryFilter, SortOrder, Types } from "mongoose";
 import Transaction, { ITransaction } from "./transaction.model";
+import Category from "../categories/category.model";
 import { ApiError } from "../../utils/apiError";
 import {
   CreateTransactionInput,
@@ -23,6 +24,7 @@ const escapeRegex = (value: string): string =>
 const buildListFilter = (
   userId: Types.ObjectId,
   query: ListTransactionsQuery,
+  categoryId?: Types.ObjectId,
 ): QueryFilter<ITransaction> => {
   const filter: QueryFilter<ITransaction> = { userId };
 
@@ -37,6 +39,10 @@ const buildListFilter = (
   if (query.search) {
     const re = new RegExp(escapeRegex(query.search), "i");
     filter.$or = [{ title: re }, { note: re }];
+  }
+
+  if (categoryId) {
+    filter.categoryId = categoryId;
   }
 
   return filter;
@@ -58,7 +64,40 @@ export const listTransactions = async (
   userId: Types.ObjectId,
   query: ListTransactionsQuery,
 ): Promise<ListTransactionsResult> => {
-  const filter = buildListFilter(userId, query);
+  let categoryId: Types.ObjectId | undefined;
+
+  if (query.category) {
+    if (Types.ObjectId.isValid(query.category)) {
+      categoryId = new Types.ObjectId(query.category);
+    } else {
+      const category = await Category.findOne({
+        userId,
+        name: {
+          $regex: new RegExp(`^${escapeRegex(query.category)}$`, "i"),
+        },
+      })
+        .select("_id")
+        .exec();
+
+      if (!category) {
+        return {
+          items: [],
+          pagination: {
+            page: query.page,
+            limit: query.limit,
+            total: 0,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: query.page > 1,
+          },
+        };
+      }
+
+      categoryId = category._id;
+    }
+  }
+
+  const filter = buildListFilter(userId, query, categoryId);
   const sort = SORT_MAP[query.sort];
   const skip = (query.page - 1) * query.limit;
 

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Transaction, TransactionFilters } from "../components/transactions/types";
+import type {
+  Transaction,
+  TransactionFilters,
+} from "../components/transactions/types";
 import { fetchTransactions } from "../services/transactionService";
 
 interface State {
@@ -35,6 +38,7 @@ export const useTransactions = (filters: TransactionFilters) => {
         const data = await fetchTransactions({
           ...(debouncedSearch ? { search: debouncedSearch } : {}),
           ...(filters.type ? { type: filters.type } : {}),
+          ...(filters.category ? { category: filters.category } : {}),
           ...(filters.startDate ? { startDate: filters.startDate } : {}),
           ...(filters.endDate ? { endDate: filters.endDate } : {}),
           sort: filters.sort,
@@ -60,6 +64,7 @@ export const useTransactions = (filters: TransactionFilters) => {
   }, [
     debouncedSearch,
     filters.type,
+    filters.category,
     filters.startDate,
     filters.endDate,
     filters.sort,

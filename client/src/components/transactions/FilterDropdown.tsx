@@ -1,35 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
 
-export interface DropdownOption {
-  value: string;
+export interface DropdownOption<T extends string = string> {
+  value: T;
   label: string;
 }
 
-interface Props {
-  value: string;
-  options: DropdownOption[];
+interface Props<T extends string = string> {
+  value: T;
+  options: DropdownOption<T>[];
   placeholder: string;
-  onChange: (value: string) => void;
+  onChange: (value: T) => void;
   disabled?: boolean;
   minWidth?: number;
 }
 
-export default function FilterDropdown({
+export default function FilterDropdown<T extends string = string>({
   value,
   options,
   placeholder,
   onChange,
   disabled = false,
   minWidth = 120,
-}: Props) {
+}: Props<T>) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const handlePointerDown = (e: PointerEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };

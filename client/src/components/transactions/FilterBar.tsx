@@ -1,6 +1,6 @@
-import { Search, CalendarDays, RotateCcw, Tag, ArrowUpDown } from "lucide-react";
+import { Search, CalendarDays, RotateCcw, ArrowUpDown } from "lucide-react";
 import type { TransactionFilters } from "./types";
-import FilterDropdown from "./FilterDropdown";
+import FilterDropdown, { type DropdownOption } from "./FilterDropdown";
 
 interface Props {
   filters: TransactionFilters;
@@ -8,29 +8,29 @@ interface Props {
   onReset: () => void;
 }
 
-const TYPE_OPTIONS = [
-  { value: "",        label: "All Types"  },
-  { value: "income",  label: "Income"     },
-  { value: "expense", label: "Expense"    },
+const TYPE_OPTIONS: DropdownOption<TransactionFilters["type"]>[] = [
+  { value: "", label: "All Types" },
+  { value: "income", label: "Income" },
+  { value: "expense", label: "Expense" },
 ];
 
-const SORT_OPTIONS = [
-  { value: "newest",  label: "Newest First"  },
-  { value: "oldest",  label: "Oldest First"  },
-  { value: "highest", label: "Highest Amount"},
-  { value: "lowest",  label: "Lowest Amount" },
+const SORT_OPTIONS: DropdownOption<TransactionFilters["sort"]>[] = [
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "highest", label: "Highest Amount" },
+  { value: "lowest", label: "Lowest Amount" },
 ];
 
 // Placeholder list — not wired to API yet
-const CATEGORY_OPTIONS = [
-  { value: "",             label: "All Categories" },
-  { value: "salary",       label: "Salary"         },
-  { value: "freelance",    label: "Freelance"       },
-  { value: "food",         label: "Food"            },
-  { value: "transport",    label: "Transport"       },
-  { value: "utilities",    label: "Utilities"       },
-  { value: "entertainment",label: "Entertainment"   },
-  { value: "investments",  label: "Investments"     },
+const CATEGORY_OPTIONS: DropdownOption<TransactionFilters["category"]>[] = [
+  { value: "", label: "All Categories" },
+  { value: "salary", label: "Salary" },
+  { value: "freelance", label: "Freelance" },
+  { value: "food", label: "Food" },
+  { value: "transport", label: "Transport" },
+  { value: "utilities", label: "Utilities" },
+  { value: "entertainment", label: "Entertainment" },
+  { value: "investments", label: "Investments" },
 ];
 
 const set =
@@ -61,9 +61,7 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
           className="filter-search-input"
           placeholder="Search transactions…"
           value={filters.search}
-          onChange={(e) =>
-            onChange({ ...filters, search: e.target.value })
-          }
+          onChange={(e) => onChange({ ...filters, search: e.target.value })}
         />
         {filters.search && (
           <button
@@ -87,10 +85,6 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
 
       {/* ── Category (UI only) ── */}
       <div className="filter-ui-only-wrap">
-        <div className="filter-ui-only-badge">
-          <Tag size={10} />
-          soon
-        </div>
         <FilterDropdown
           value={filters.category}
           options={CATEGORY_OPTIONS}
@@ -122,9 +116,7 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
             className="filter-date-input"
             value={filters.endDate}
             min={filters.startDate || undefined}
-            onChange={(e) =>
-              onChange({ ...filters, endDate: e.target.value })
-            }
+            onChange={(e) => onChange({ ...filters, endDate: e.target.value })}
           />
         </div>
       </div>
