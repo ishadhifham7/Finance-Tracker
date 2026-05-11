@@ -82,6 +82,9 @@ export const listTransactionsQuerySchema = z
     { message: "startDate must be before endDate", path: ["startDate"] },
   );
 
+export const monthlyTrendsQuerySchema = z.object({}).strict();
+
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
+export type MonthlyTrendsQuery = z.infer<typeof monthlyTrendsQuerySchema>;

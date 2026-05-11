@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -5,7 +6,16 @@ import {
   Percent,
   MoreHorizontal,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 import { useDashboardSummary } from "../hooks/useDashboardSummary";
+import { useMonthlyTrends } from "../hooks/useMonthlyTrends";
 import { formatCurrency } from "../utils/formatCurrency";
 
 const recentTransactions = [
@@ -19,10 +29,32 @@ const budgetItems = [
   { label: "Shopping", spent: 0, limit: 300, color: "#f59e0b" },
 ];
 
-const chartMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-
 export default function Dashboard() {
   const { summary, isLoading, error } = useDashboardSummary();
+  const { trends, isLoading: isLoadingTrends } = useMonthlyTrends();
+
+  // Generate the last 6 months to ensure the chart always has 6 data points.
+  // This pads missing months with 0s so lines draw completely from a 0 baseline.
+  const chartData = useMemo(() => {
+    const data = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      // Create date for (now - i months)
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+      const found = trends.find((t) => t.month === monthStr);
+      data.push({
+        name: d.toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        }),
+        income: found?.income || 0,
+        expenses: found?.expenses || 0,
+      });
+    }
+    return data;
+  }, [trends]);
 
   const statCards = [
     {
@@ -91,21 +123,73 @@ export default function Dashboard() {
               <MoreHorizontal size={16} />
             </button>
           </div>
-          <div className="bento-chart-area">
-            <div className="bento-chart-bars">
-              {chartMonths.map((month) => (
-                <div key={month} className="bento-chart-bar-col">
-                  <div className="bento-chart-bar-track">
-                    <div
-                      className="bento-chart-bar-fill"
-                      style={{ height: "0%" }}
-                    />
-                  </div>
-                  <span className="bento-chart-label">{month}</span>
-                </div>
-              ))}
-            </div>
-            <div className="bento-chart-empty">No data yet</div>
+          <div
+            className="bento-chart-area"
+            style={{ height: "250px", position: "relative" }}
+          >
+            {isLoadingTrends ? (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  className="bento-skeleton-line"
+                  style={{ width: "100%", height: "100%", borderRadius: "8px" }}
+                />
+              </div>
+            ) : chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    vertical={false}
+                    stroke="var(--border)"
+                    strokeDasharray="3 3"
+                    opacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    stroke="var(--text-muted)"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="var(--text-muted)"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="income"
+                    stroke="#10b981"
+                    strokeWidth={1.5}
+                    dot={{ fill: "#10b981", r: 2 }}
+                    activeDot={false}
+                    name="Income"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="expenses"
+                    stroke="#ef4444"
+                    strokeWidth={1.5}
+                    dot={{ fill: "#ef4444", r: 2 }}
+                    activeDot={false}
+                    name="Expenses"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="bento-chart-empty">No data yet</div>
+            )}
           </div>
         </div>
 
@@ -162,6 +246,37 @@ export default function Dashboard() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        <div
+          className="bento-card"
+          style={{
+            gridColumn: "span 2",
+            minHeight: "250px",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <div className="bento-card-header">
+            <span className="bento-card-title">Expense Breakdown</span>
+            <button className="bento-more-btn">
+              <MoreHorizontal size={16} />
+            </button>
+          </div>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--text-muted)",
+              border: "1px dashed var(--border)",
+              borderRadius: "8px",
+              margin: "16px 0 0",
+            }}
+          >
+            [Pie Chart Placeholder]
           </div>
         </div>
 

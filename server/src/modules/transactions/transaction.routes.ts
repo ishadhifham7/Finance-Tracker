@@ -4,6 +4,7 @@ import {
   createTransaction,
   deleteTransaction,
   getFinancialSummary,
+  getMonthlyTrends,
   getTransaction,
   listTransactions,
   updateTransaction,
@@ -13,12 +14,10 @@ const router = Router();
 
 router.use(protect);
 
+router.get("/monthly-trends", getMonthlyTrends);
 router.get("/summary", getFinancialSummary);
 
-router
-  .route("/")
-  .get(listTransactions)
-  .post(createTransaction);
+router.route("/").get(listTransactions).post(createTransaction);
 
 router
   .route("/:id")

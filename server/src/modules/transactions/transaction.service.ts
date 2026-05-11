@@ -4,6 +4,7 @@ import { ApiError } from "../../utils/apiError";
 import {
   CreateTransactionInput,
   ListTransactionsQuery,
+  MonthlyTrendsQuery,
   UpdateTransactionInput,
 } from "./transaction.validation";
 
@@ -213,4 +214,77 @@ export const getFinancialSummary = async (
     totalBalance,
     savingRate,
   };
+};
+
+export interface MonthlyTrendPoint {
+  month: string;
+  income: number;
+  expenses: number;
+}
+
+interface MonthlyTrendGroup {
+  _id: string;
+  income: number;
+  expenses: number;
+}
+
+const formatMonth = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
+};
+
+const parseMonth = (month: string): Date => {
+  const [y, m] = month.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, 1);
+};
+
+const addMonths = (date: Date, n: number): Date =>
+  new Date(date.getFullYear(), date.getMonth() + n, 1);
+
+export const getMonthlyTrends = async (
+  userId: Types.ObjectId,
+  _query: MonthlyTrendsQuery,
+): Promise<MonthlyTrendPoint[]> => {
+  const groups = await Transaction.aggregate<MonthlyTrendGroup>([
+    { $match: { userId } },
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: "%Y-%m", date: "$date" },
+        },
+        income: {
+          $sum: {
+            $cond: [{ $eq: ["$transactionType", "income"] }, "$amount", 0],
+          },
+        },
+        expenses: {
+          $sum: {
+            $cond: [{ $eq: ["$transactionType", "expense"] }, "$amount", 0],
+          },
+        },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]).exec();
+
+  if (groups.length === 0) return [];
+
+  const byMonth = new Map(
+    groups.map((g) => [g._id, { income: g.income, expenses: g.expenses }]),
+  );
+
+  const first = parseMonth(groups[0]._id);
+  const last = parseMonth(groups[groups.length - 1]._id);
+
+  const result: MonthlyTrendPoint[] = [];
+  let cursor = first;
+  while (cursor <= last) {
+    const key = formatMonth(cursor);
+    const entry = byMonth.get(key) ?? { income: 0, expenses: 0 };
+    result.push({ month: key, income: entry.income, expenses: entry.expenses });
+    cursor = addMonths(cursor, 1);
+  }
+
+  return result;
 };

@@ -80,3 +80,16 @@ export const createTransaction = async (
   );
   return data.data.transaction;
 };
+
+export interface MonthlyTrend {
+  month: string;
+  income: number;
+  expenses: number;
+}
+
+export const fetchMonthlyTrends = async (): Promise<MonthlyTrend[]> => {
+  const { data } = await api.get<{ status: string; data: MonthlyTrend[] }>(
+    "/transactions/monthly-trends",
+  );
+  return data.data;
+};
