@@ -15,7 +15,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-header">
         <span className="brand-accent">●</span>
-        <span className="brand-name">FinTrack</span>
+        <span className="brand-name">Finance Tracker</span>
       </div>
 
       <nav className="sidebar-nav">

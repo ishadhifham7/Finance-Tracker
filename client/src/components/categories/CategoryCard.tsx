@@ -62,6 +62,7 @@ export default function CategoryCard({
   const config = TYPE_CONFIG[category.type];
   const TypeIcon = config.icon;
   const txCount = category.transactionCount ?? 0;
+  const showAllocate = category.type === "expense";
 
   return (
     <div
@@ -86,19 +87,23 @@ export default function CategoryCard({
         </p>
 
         <div className="cat-card-footer">
-          <button
-            className="cat-allocate-btn"
-            type="button"
-            onClick={(e) =>
-              onAllocateBudget(
-                category.id,
-                (e.currentTarget as HTMLButtonElement).getBoundingClientRect(),
-              )
-            }
-          >
-            <Wallet size={13} strokeWidth={2} />
-            Allocate Budget
-          </button>
+          {showAllocate && (
+            <button
+              className="cat-allocate-btn"
+              type="button"
+              onClick={(e) =>
+                onAllocateBudget(
+                  category.id,
+                  (
+                    e.currentTarget as HTMLButtonElement
+                  ).getBoundingClientRect(),
+                )
+              }
+            >
+              <Wallet size={13} strokeWidth={2} />
+              Allocate Budget
+            </button>
+          )}
 
           <button
             ref={btnRef}

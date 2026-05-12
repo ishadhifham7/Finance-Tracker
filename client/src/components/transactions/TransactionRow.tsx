@@ -68,21 +68,16 @@ export default function TransactionRow({
       <td className="tx-td tx-col-category">
         {cat ? (
           <span
-            className="tx-category-pill"
             style={{
-              borderColor: `${cat.color}55`,
               color: cat.color,
-              backgroundColor: `${cat.color}12`,
+              fontWeight: 500,
+              fontSize: "14px",
             }}
           >
-            <span
-              className="tx-category-dot"
-              style={{ backgroundColor: cat.color }}
-            />
             {cat.name}
           </span>
         ) : (
-          <span className="tx-category-pill tx-category-empty">
+          <span style={{ color: "#9ca3af", fontSize: "14px" }}>
             Uncategorized
           </span>
         )}
@@ -95,7 +90,7 @@ export default function TransactionRow({
 
       {/* Amount */}
       <td className="tx-td tx-col-amount tx-amount-cell">
-        <span className={`tx-amount-text ${transaction.transactionType}`}>
+        <span className="tx-amount-text" style={{ color: "#9ca3af" }}>
           {isIncome ? "+" : "−"}&thinsp;{formatAmount(transaction.amount)}
         </span>
       </td>

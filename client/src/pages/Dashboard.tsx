@@ -1,12 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  Percent,
-  MoreHorizontal,
-} from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Percent } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -112,7 +106,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-page">
       <header className="page-header">
-        <h1>Dashboard</h1>
+        <h1 className="pb-10">Dashboard</h1>
         <p>Your financial overview at a glance.</p>
       </header>
 
@@ -145,7 +139,7 @@ export default function Dashboard() {
 
         <div className="bento-card bento-chart">
           <div className="bento-card-header">
-            <span className="bento-card-title">Spending Overview</span>
+            <span className="bento-card-title">Income vs Expenses</span>
           </div>
           <div
             className="bento-chart-area"
@@ -344,9 +338,33 @@ export default function Dashboard() {
             flexDirection: "column",
           }}
         >
-          <div className="bento-card-header">
+          {/* Header */}
+          <div
+            className="bento-card-header"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              position: "relative",
+            }}
+          >
             <span className="bento-card-title">Expense Distribution</span>
+
+            {/* Monthly Pill */}
+            <span
+              style={{
+                fontSize: "12px",
+                padding: "2px 10px",
+                borderRadius: "999px",
+                border: "1px solid #9ca3af",
+                color: "#9ca3af",
+                fontWeight: 500,
+              }}
+            >
+              Monthly
+            </span>
           </div>
+
           <div
             style={{
               flex: 1,
@@ -394,8 +412,6 @@ export default function Dashboard() {
                         outerRadius={80}
                         stroke="none"
                         paddingAngle={4}
-                        animationDuration={800}
-                        animationEasing="ease-out"
                       >
                         {distribution.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -404,7 +420,7 @@ export default function Dashboard() {
                     </PieChart>
                   </ResponsiveContainer>
 
-                  {/* Center Text Wrapper */}
+                  {/* Center Text */}
                   <div
                     style={{
                       position: "absolute",
@@ -430,7 +446,6 @@ export default function Dashboard() {
                         fontSize: "1.05rem",
                         fontWeight: 600,
                         color: "var(--text)",
-                        textShadow: "0 0 10px rgba(255,255,255,0.1)",
                       }}
                     >
                       {totalExpenseDistribution.toLocaleString("en-US")}{" "}
@@ -447,7 +462,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Right Side: Legend Area */}
+                {/* Right Side: Legend */}
                 <div
                   style={{
                     width: "50%",
@@ -484,11 +499,11 @@ export default function Dashboard() {
                             height: "10px",
                             borderRadius: "50%",
                             backgroundColor: item.color,
-                            boxShadow: `0 0 8px ${item.color}80`,
                           }}
                         />
                         {item.category}
                       </div>
+
                       <span
                         style={{
                           fontWeight: 600,
