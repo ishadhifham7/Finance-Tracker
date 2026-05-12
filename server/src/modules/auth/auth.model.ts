@@ -4,7 +4,6 @@ export interface IUser extends Document {
   firebaseUid: string;
   email: string;
   displayName?: string;
-  photoURL?: string;
   createdAt: Date;
 }
 
@@ -12,7 +11,6 @@ const UserSchema: Schema = new Schema({
   firebaseUid: { type: String, required: true, unique: true, index: true },
   email: { type: String, required: true, unique: true },
   displayName: { type: String },
-  photoURL: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
 
